@@ -1,0 +1,120 @@
+BATEAUX = []
+
+def afficherPlateau(plateau):
+    for ligne in plateau:
+        l = ""
+        for el in ligne:
+            l += str(el)
+            l += " "
+        print(l)
+
+def genererPlateau(size):
+    plateau = []
+    alphabet = "abcdefghijklmnopqrstuvwxyz"
+    for i in range(size + 2):
+        plateau.append([])
+        for j in range(size + 2):
+            if i == 0 and j == 0:
+                plateau[i].append(" ")
+            elif j == 0 and i >= 2:
+                plateau[i].append(alphabet[i-2].upper())
+            elif i == 0 and j >= 2:
+                plateau[i].append(str(j-1))
+            elif i != 1 and j != 1:
+                plateau[i].append('\x1b[34m' + 'O' + '\x1b[0m')
+            else:
+                plateau[i].append(" ")
+    return plateau
+
+def bateauDepasse(longueurBateau,x,y,orientation):
+    return x + longueurBateau > len(plateau)-2 and orientation == 1 or y + longueurBateau > len(plateau)-2 and orientation != 1
+
+def emplacementDisponible(longueurBateau,x,y,orientation):
+    i = 0
+    emplacementDisponible = True
+    while i < longueurBateau and emplacementDisponible == True:
+        if orientation == 1:
+            if plateau[x+i][y] == "X":
+                emplacementDisponible = False
+        else:
+            if plateau[x][y+i] == "X":
+                emplacementDisponible = False
+        i += 1
+    return emplacementDisponible
+
+def trouverPosition(x,y):
+    alphabet = "abcdefghijklmnopqrstuvwxyz"
+    for i in range(len(alphabet)):
+        if x == alphabet[i].upper():
+            return i+2,y+1
+
+def placerBateau(longueurBateau,lettre,y,orientation):
+    x,y = trouverPosition(lettre,y)
+    if bateauDepasse(longueurBateau,x,y,orientation):
+        print("Le bateau ne peut pas être placé à cet emplacement !\n")
+    if not emplacementDisponible(longueurBateau,x,y,orientation):
+        print("Il y a déjà un bateau sur cet emplacement !\n")
+    else:
+        for i in range(longueurBateau):
+            if orientation == 1:
+                plateau[x+i][y] = 'X'
+            else:
+                plateau[x][y+i] = 'X'
+        nbVie = longueurBateau
+        BATEAUX.append([longueurBateau,x,y,orientation,nbVie])
+
+def remplacerBateau(longueurBateau,x,y,orientation):
+    for i in range(longueurBateau):
+            if orientation == 1:
+                plateau[x+i][y] = '\x1b[34m' + 'O' + '\x1b[0m'
+            else:
+                plateau[x][y+i] = '\x1b[34m' + 'O' + '\x1b[0m'
+
+def attaquerBateau(lettre,y):
+    x,y = trouverPosition(lettre,y)
+    if plateau[x][y] == 'X':
+        print("Touché !\n")
+        plateau[x][y] = 'F'
+        i = 0
+        bateauTrouve = False
+        while i <= len(BATEAUX) and not bateauTrouve:
+            bateau = BATEAUX[i]
+            j = 0
+            while j < bateau[0] and not bateauTrouve:
+
+                if bateau[1] + j == x and bateau[2] == y and bateau[3] == 1:
+                    bateau[4] -= 1
+                    bateauTrouve = True
+                elif bateau[1] == x and bateau[2] + j == y and bateau[3] == 0:
+                    bateau[4] -= 1
+                    bateauTrouve = True
+                if bateau[4] == 0:
+                    print("Coulé !\n")
+                    remplacerBateau(bateau[0],bateau[1],bateau[2],bateau[3])
+                    
+                j += 1
+            i += 1
+    else:
+        print("Loupé !\n")
+    
+
+plateau = genererPlateau(10)
+placerBateau(5,"I",2,0)
+placerBateau(2,"B",8,1)
+afficherPlateau(plateau)
+attaquerBateau("I",6)
+print(BATEAUX)
+afficherPlateau(plateau)
+print(BATEAUX)
+attaquerBateau("I",5)
+afficherPlateau(plateau)
+print(BATEAUX)
+attaquerBateau("I",4)
+afficherPlateau(plateau)
+print(BATEAUX)
+attaquerBateau("I",3)
+afficherPlateau(plateau)
+print(BATEAUX)
+attaquerBateau("I",2)
+afficherPlateau(plateau)
+print(BATEAUX)
